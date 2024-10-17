@@ -32,6 +32,10 @@ def descargar_modelo(model_dir, model_folder, file_id):
     :return: Ruta al modelo o None si falla la descarga/extracción.
     """
     model_path = os.path.join(model_dir, model_folder)
+    
+    # Asegurar que el directorio model_dir existe
+    os.makedirs(model_dir, exist_ok=True)
+    
     if os.path.exists(model_path):
         st.info("El modelo ya está presente localmente.")
         return model_path
