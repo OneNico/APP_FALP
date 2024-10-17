@@ -5,6 +5,7 @@ from src.ui.visualizacion import mostrar_visualizacion
 from src.ui.convertir_png import mostrar_convertir_png  # Importar la nueva función
 from src.ui.clasificacion_deep_learning import (
     cargar_modelo,
+    cargar_modelo_pytorch,  # Asegúrate de tener esta función en tu módulo
     procesar_archivo,
     clasificar_imagen,
     mostrar_resultados
@@ -361,7 +362,7 @@ def main():
                 model_path = os.path.join(model_dir, model_folder)
 
                 # ID del archivo ZIP en Google Drive (reemplaza con tu ID real del ZIP)
-                file_id_zip = "1Md_1OCIYO-VqXBZApdQ2RNmXXOvw8mEB"  # Reemplaza con el ID real del ZIP
+                file_id_zip = "1S4oBDDV0KGdJQVllj6kmz4pekubVVg-J"  # Reemplaza con el ID real del ZIP
 
                 # Descargar el modelo si no existe
                 model_path = descargar_modelo(model_dir, model_folder, file_id_zip)
@@ -372,6 +373,10 @@ def main():
 
                     # Cargar el modelo
                     classifier = cargar_modelo(model_path)
+                    
+                    if classifier is None:
+                        # Si falla, intentar cargarlo manualmente como un modelo de PyTorch
+                        classifier = cargar_modelo_pytorch(model_path)
 
                     if classifier:
                         # Definir mapeo de etiquetas
