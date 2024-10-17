@@ -23,8 +23,8 @@ def cargar_modelo_pytorch(model_path):
             st.error(f"Archivo de modelo no encontrado: {model_file}")
             return None
 
-        # Cargar el modelo usando transformers que soporta safetensors
-        model = torch.jit.load(model_file, map_location='cpu')
+        # Cargar el modelo usando torch
+        model = torch.load(model_file, map_location='cpu')
         model.eval()
         return model
     except Exception as e:
