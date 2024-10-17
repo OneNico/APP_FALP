@@ -358,7 +358,7 @@ def main():
 
                 # Inicializar el pipeline de clasificación de imágenes
                 model_dir = os.path.join('src', 'data', 'modelos')
-                model_folder = 'VT_V8/checkpoint-9065'  # Actualizado para apuntar al checkpoint
+                model_folder = 'VT_V8'  # Cambiado a 'VT_V8'
                 model_path = os.path.join(model_dir, model_folder)
 
                 # ID del archivo ZIP en Google Drive (reemplaza con tu ID real del ZIP)
@@ -373,7 +373,7 @@ def main():
 
                     # Cargar el modelo
                     classifier = cargar_modelo(model_path)
-                    
+
                     if classifier is None:
                         # Si falla, intentar cargarlo manualmente como un modelo de PyTorch
                         classifier = cargar_modelo_pytorch(model_path)
