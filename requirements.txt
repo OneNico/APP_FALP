@@ -14,4 +14,4 @@ torch
 torchvision 
 torchaudio
 gdown
-
+zipfile
