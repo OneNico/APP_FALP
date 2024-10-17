@@ -22,12 +22,22 @@ def cargar_modelo_safetensors(model_path, google_drive_url=None):
     # Cargar el modelo desde la ruta local (formato .safetensors)
     if os.path.exists(model_path):
         st.success(f"Modelo cargado desde {model_path}")
-        model = load_file(model_path)  # Cargar el modelo en formato .safetensors
+        state_dict = load_file(model_path)  # Cargar el state_dict desde .safetensors
+
+        # Reconstruir el modelo
+        model = nn.Sequential(
+            # Aquí deberías definir las capas del modelo que coincidan con tu entrenamiento
+            # Por ejemplo, si es una red simple puedes añadir las capas aquí.
+            nn.Linear(224, 128),
+            nn.ReLU(),
+            nn.Linear(128, 2)
+        )
+        model.load_state_dict(state_dict)  # Cargar el estado del modelo
+        model.eval()  # Asegúrate de que está en modo de evaluación
         return model
     else:
         st.error("El modelo no se pudo encontrar o descargar.")
         return None
-
 
 def main():
     # Inyectar CSS personalizado
