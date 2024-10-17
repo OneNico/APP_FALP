@@ -5,7 +5,6 @@ from src.ui.visualizacion import mostrar_visualizacion
 from src.ui.convertir_png import mostrar_convertir_png  # Importar la nueva función
 from src.ui.clasificacion_deep_learning import (
     cargar_modelo,
-    cargar_modelo_pytorch,  # Asegúrate de tener esta función en tu módulo
     procesar_archivo,
     clasificar_imagen,
     mostrar_resultados
@@ -377,10 +376,6 @@ def main():
 
                     # Cargar el modelo
                     classifier = cargar_modelo(model_path)
-
-                    if classifier is None:
-                        # Si falla, intentar cargarlo manualmente como un modelo de PyTorch
-                        classifier = cargar_modelo_pytorch(model_path)
 
                     if classifier:
                         # Definir mapeo de etiquetas
