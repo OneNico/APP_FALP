@@ -1,6 +1,6 @@
 import streamlit as st
 from src.ui.visualizacion import mostrar_visualizacion
-from src.ui.convertir_png import mostrar_convertir_png  # Importar la nueva funciónn
+from src.ui.convertir_png import mostrar_convertir_png  # Importar la nueva función
 from src.ui.clasificacion_deep_learning import (
     cargar_modelo,
     procesar_archivo,
