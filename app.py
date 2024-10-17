@@ -13,30 +13,36 @@ from safetensors.torch import load_file  # Para cargar modelos .safetensors
 
 
 # Función para descargar y cargar el modelo desde Google Drive
-def cargar_modelo_safetensors(model_path, google_drive_url=None):
+
+def cargar_modelo_safetensors(model_path, config_path, google_drive_url=None):
     # Si el modelo no está en la ruta local, descargarlo desde Google Drive
     if not os.path.exists(model_path) and google_drive_url is not None:
         st.info("Descargando el modelo desde Google Drive...")
         gdown.download(google_drive_url, model_path, quiet=False)
 
     # Cargar el modelo desde la ruta local (formato .safetensors)
-    if os.path.exists(model_path):
+    if os.path.exists(model_path) and os.path.exists(config_path):
         st.success(f"Modelo cargado desde {model_path}")
-        state_dict = load_file(model_path)  # Cargar el state_dict desde .safetensors
+        
+        # Leer el archivo de configuración para obtener la arquitectura
+        with open(config_path, "r") as f:
+            config = json.load(f)
 
-        # Reconstruir el modelo
-        model = nn.Sequential(
-            # Aquí deberías definir las capas del modelo que coincidan con tu entrenamiento
-            # Por ejemplo, si es una red simple puedes añadir las capas aquí.
-            nn.Linear(224, 128),
-            nn.ReLU(),
-            nn.Linear(128, 2)
-        )
-        model.load_state_dict(state_dict)  # Cargar el estado del modelo
-        model.eval()  # Asegúrate de que está en modo de evaluación
+        # Si es compatible con Hugging Face, puedes usar algo como esto:
+        model = AutoModel.from_config(config)
+
+        # Cargar los pesos desde el archivo .safetensors
+        state_dict = load_file(model_path)
+
+        # Cargar los pesos en el modelo
+        model.load_state_dict(state_dict)
+
+        # Poner el modelo en modo de evaluación
+        model.eval()
+
         return model
     else:
-        st.error("El modelo no se pudo encontrar o descargar.")
+        st.error("El modelo o la configuración no se pudieron encontrar.")
         return None
 
 def main():
