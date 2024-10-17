@@ -27,7 +27,7 @@ def descargar_modelo(model_dir, model_folder, file_id):
 
     :param model_dir: Directorio donde se almacenarán los modelos.
     :param model_folder: Nombre de la carpeta del modelo.
-    :param file_id: ID del archivo en Google Drive.
+    :param file_id: ID del archivo ZIP en Google Drive.
     :return: Ruta al modelo o None si falla la descarga/extracción.
     """
     model_path = os.path.join(model_dir, model_folder)
@@ -50,6 +50,21 @@ def descargar_modelo(model_dir, model_folder, file_id):
         logger.error(f"Error al descargar o extraer el modelo: {e}")
         st.error(f"Error al descargar o extraer el modelo: {e}")
         return None
+
+def listar_archivos(model_path):
+    """
+    Lista todos los archivos y carpetas dentro del directorio del modelo.
+    
+    :param model_path: Ruta al directorio del modelo.
+    """
+    st.write("### Archivos en el directorio del modelo:")
+    for root, dirs, files in os.walk(model_path):
+        level = root.replace(model_path, '').count(os.sep)
+        indent = ' ' * 4 * level
+        st.write(f"{indent}{os.path.basename(root)}/")
+        subindent = ' ' * 4 * (level + 1)
+        for f in files:
+            st.write(f"{subindent}{f}")
 
 def main():
     # Inyectar CSS personalizado para estilos profesionales y el nuevo diseño del título
@@ -345,21 +360,16 @@ def main():
                 model_folder = 'VT_V8'
                 model_path = os.path.join(model_dir, model_folder)
 
-                # ID del archivo en Google Drive (reemplaza con tu ID real)
-                file_id = "1Md_1OCIYO-VqXBZApdQ2RNmXXOvw8mEB"  # Reemplaza con tu ID de carpeta (No es un archivo)
-
-                # **Importante:** gdown no puede descargar carpetas directamente utilizando su ID.
-                # Debes asegurarte de que el modelo esté comprimido en un archivo ZIP y usar su file_id.
-                # Supongamos que ya has comprimido la carpeta en VT_V8.zip y lo has subido a Google Drive.
-                # Entonces, el file_id debería ser el de VT_V8.zip.
-
-                # **Reemplaza el `file_id` con el ID de tu archivo ZIP**
-                file_id_zip = "YOUR_GOOGLE_DRIVE_FILE_ID_ZIP"  # Reemplaza con el ID real del ZIP
+                # ID del archivo ZIP en Google Drive (reemplaza con tu ID real del ZIP)
+                file_id_zip = "1Md_1OCIYO-VqXBZApdQ2RNmXXOvw8mEB"  # Reemplaza con el ID real del ZIP
 
                 # Descargar el modelo si no existe
                 model_path = descargar_modelo(model_dir, model_folder, file_id_zip)
 
                 if model_path:
+                    # Listar archivos para depuración
+                    listar_archivos(model_path)
+
                     # Cargar el modelo
                     classifier = cargar_modelo(model_path)
 
