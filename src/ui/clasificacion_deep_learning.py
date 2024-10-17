@@ -1,4 +1,4 @@
-# src/ui/clasificacion_deep_learning.py
+# src/ui/clasificacion_deep_learning.pyy
 
 from transformers import pipeline, AutoConfig, AutoModelForImageClassification
 import torch
