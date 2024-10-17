@@ -17,8 +17,8 @@ def cargar_modelo(model_path):
 
 def cargar_modelo_pytorch(model_path):
     try:
-        # Ajusta el nombre del archivo de pesos según corresponda
-        model_file = os.path.join(model_path, 'model.safetensors')  # Cambiado a 'model.safetensors'
+        # Ruta al archivo de pesos safetensors
+        model_file = os.path.join(model_path, 'model.safetensors')  # Ruta corregida
         if not os.path.exists(model_file):
             st.error(f"Archivo de modelo no encontrado: {model_file}")
             return None
