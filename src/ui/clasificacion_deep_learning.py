@@ -8,7 +8,7 @@ import os
 def cargar_modelo(model_path):
     try:
         config = AutoConfig.from_pretrained(model_path)
-        model = AutoModelForImageClassification.from_pretrained(model_path)
+        model = AutoModelForImageClassification.from_pretrained(model_path, trust_remote_code=True)
         classifier = pipeline("image-classification", model=model, config=config)
         return classifier
     except Exception as e:
@@ -18,8 +18,13 @@ def cargar_modelo(model_path):
 def cargar_modelo_pytorch(model_path):
     try:
         # Ajusta el nombre del archivo de pesos según corresponda
-        model_file = os.path.join(model_path, 'model.pth')  # Ejemplo: 'model.pth'
-        model = torch.load(model_file, map_location='cpu')
+        model_file = os.path.join(model_path, 'model.safetensors')  # Cambiado a 'model.safetensors'
+        if not os.path.exists(model_file):
+            st.error(f"Archivo de modelo no encontrado: {model_file}")
+            return None
+
+        # Cargar el modelo usando transformers que soporta safetensors
+        model = torch.jit.load(model_file, map_location='cpu')
         model.eval()
         return model
     except Exception as e:
