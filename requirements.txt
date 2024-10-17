@@ -6,5 +6,8 @@ Pillow
 scikit-image
 numpy
 scipy
-
+albumentations
+numpy
+scipy
+transformers
 
