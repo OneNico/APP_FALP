@@ -9,5 +9,5 @@ scipy
 albumentations
 numpy
 scipy
-transformers
+transformers torch torchvision torchaudio
 
