@@ -15,6 +15,8 @@ import torch
 import gdown
 import zipfile
 import logging
+import time
+import random
 
 # Configuración del logger
 logging.basicConfig(level=logging.ERROR)
@@ -40,13 +42,28 @@ def descargar_modelo(model_dir, model_folder, file_id):
         return model_path
 
     st.info("Descargando el modelo desde Google Drive. Esto puede tardar unos minutos...")
-    url = f"https://drive.google.com/uc?id={file_id}&export=download"
-    zip_path = os.path.join(model_dir, f"{model_folder}.zip")
+
+    # Crear una barra de progreso
+    progress_bar = st.progress(0)
+    status_text = st.empty()
 
     try:
-        gdown.download(url, zip_path, quiet=False)
+        url = f"https://drive.google.com/uc?id={file_id}&export=download"
+        zip_path = os.path.join(model_dir, f"{model_folder}.zip")
+
+        # Simular progreso de descarga
+        for percent_complete in range(1, 101):
+            progress_bar.progress(percent_complete)
+            status_text.text(f"Descargando... {percent_complete}%")
+            time.sleep(random.uniform(0.005, 0.02))  # Simular tiempo de descarga
+
+        # Descargar el archivo real usando gdown
+        gdown.download(url, zip_path, quiet=True)
+
+        # Extraer el archivo ZIP
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(model_dir)
+        
         os.remove(zip_path)
         st.success("Modelo descargado y extraído correctamente.")
         return model_path
@@ -312,8 +329,10 @@ def main():
 
             # Opciones adicionales
             opciones['mostrar_metadatos'] = st.sidebar.checkbox("Mostrar Metadatos", value=False)
-            opciones['aplicar_voilut'] = st.sidebar.checkbox("Aplicar VOI LUT", value=False)  # Cambiado a False por defecto
-            opciones['invertir_interpretacion'] = st.sidebar.checkbox("Invertir Interpretación Fotométrica", value=False)
+            opciones['aplicar_voilut'] = st.sidebar.checkbox("Aplicar VOI LUT",
+                                                             value=False)  # Cambiado a False por defecto
+            opciones['invertir_interpretacion'] = st.sidebar.checkbox("Invertir Interpretación Fotométrica",
+                                                                      value=False)
             opciones['aplicar_transformaciones'] = st.sidebar.checkbox("Aplicar Transformaciones", value=False)
 
             # Si se selecciona aplicar transformaciones, mostrar las 6 opciones restantes con checkboxes
@@ -335,7 +354,8 @@ def main():
 
                 for key, label in transformaciones:
                     # Crear un checkbox para cada transformación
-                    opciones['transformaciones_seleccionadas'][key] = st.sidebar.checkbox(label=label, value=False, key=key)
+                    opciones['transformaciones_seleccionadas'][key] = st.sidebar.checkbox(label=label, value=False,
+                                                                                          key=key)
 
         elif subseccion == "Convertir a PNG":
             # Opciones para Convertir a PNG
@@ -359,36 +379,38 @@ def main():
                 # Mostrar la imagen procesada
                 st.image(image, caption='Imagen procesada (224x224)', use_column_width=True)
 
-                # Inicializar el pipeline de clasificación de imágenes
-                model_dir = os.path.join('src', 'data', 'modelos')
-                model_folder = 'VT_V8'  # Asegurado que es 'VT_V8'
-                model_path = os.path.join(model_dir, model_folder)
+                # Agregar una barra de carga y mensaje durante la descarga y carga del modelo
+                with st.spinner("Cargando el modelo (solo lo realizará la primera vez)..."):
+                    # Inicializar el pipeline de clasificación de imágenes
+                    model_dir = os.path.join('src', 'data', 'modelos')
+                    model_folder = 'VT_V8'  # Asegurado que es 'VT_V8'
+                    model_path = os.path.join(model_dir, model_folder)
 
-                # ID del archivo ZIP en Google Drive (reemplaza con tu ID real del ZIP)
-                file_id_zip = "1S4oBDDV0KGdJQVllj6kmz4pekubVVg-J"  # Reemplaza con el ID real del ZIP
+                    # ID del archivo ZIP en Google Drive (reemplaza con tu ID real del ZIP)
+                    file_id_zip = "1S4oBDDV0KGdJQVllj6kmz4pekubVVg-J"  # Reemplaza con el ID real del ZIP
 
-                # Descargar el modelo si no existe
-                model_path = descargar_modelo(model_dir, model_folder, file_id_zip)
+                    # Descargar el modelo si no existe
+                    model_path = descargar_modelo(model_dir, model_folder, file_id_zip)
 
-                if model_path:
-                    # Listar archivos para depuración
-                    listar_archivos(model_path)
+                    if model_path:
+                        # Eliminar la llamada a listar_archivos para evitar imprimir la estructura del modelo
+                        # listar_archivos(model_path)  # Comentada para no imprimir
 
-                    # Cargar el modelo
-                    classifier = cargar_modelo(model_path)
+                        # Cargar el modelo
+                        classifier = cargar_modelo(model_path)
 
-                    if classifier:
-                        # Definir mapeo de etiquetas
-                        prediction_mapping = {
-                            'LABEL_0': 'benigna',
-                            'LABEL_1': 'maligna'
-                        }
+                        if classifier:
+                            # Definir mapeo de etiquetas
+                            prediction_mapping = {
+                                'LABEL_0': 'benigna',
+                                'LABEL_1': 'maligna'
+                            }
 
-                        # Realizar la inferencia
-                        mapped_result = clasificar_imagen(image, classifier, prediction_mapping)
+                            # Realizar la inferencia
+                            mapped_result = clasificar_imagen(image, classifier, prediction_mapping)
 
-                        # Mostrar los resultados
-                        mostrar_resultados(mapped_result)
+                            # Mostrar los resultados
+                            mostrar_resultados(mapped_result)
         else:
             st.info("Por favor, carga una imagen DICOM, PNG o JPG para realizar la clasificación.")
 
