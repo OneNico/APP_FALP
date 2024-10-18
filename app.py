@@ -1,4 +1,4 @@
-# app.py
+# app.pyy
 
 import streamlit as st
 from src.ui.visualizacion import mostrar_visualizacion
