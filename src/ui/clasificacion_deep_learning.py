@@ -1,16 +1,15 @@
+# src/ui/clasificacion_deep_learning.pyy
+
 import streamlit as st
 from PIL import Image
 import pydicom
 from pydicom.pixel_data_handlers.util import apply_voi_lut
 import numpy as np
 import os
-from src.ui.visualizacion import mostrar_visualizacion
-from src.ui.convertir_png import mostrar_convertir_png  # Importar la nueva función
-import logging
-import io
+from transformers import pipeline, AutoImageProcessor, AutoConfig, AutoModelForImageClassification
 import torch
-import gdown
-import zipfile
+from safetensors.torch import load_file  # Asegúrate de tener safetensors instalado
+import logging
 
 # Configuración del logger
 logging.basicConfig(level=logging.ERROR)
@@ -29,15 +28,12 @@ def cargar_modelo(model_path):
         return None
 
     try:
-        # Cargar procesador de imágenes
+        # Cargar configuración y procesador de imágenes
+        config = AutoConfig.from_pretrained(model_path)
         image_processor = AutoImageProcessor.from_pretrained(model_path)
         
-        # Cargar modelo utilizando safetensors
-        model = AutoModelForImageClassification.from_pretrained(
-            model_path,
-            trust_remote_code=True,  # Solo si tu modelo requiere código remoto
-            safetensors=True         # Corregir el argumento
-        )
+        # Cargar modelo
+        model = AutoModelForImageClassification.from_pretrained(model_path, trust_remote_code=True)
         
         # Determinar dispositivo
         if torch.cuda.is_available():
@@ -48,17 +44,8 @@ def cargar_modelo(model_path):
             device = -1  # CPU
 
         # Crear pipeline
-        classifier = pipeline(
-            "image-classification",
-            model=model,
-            image_processor=image_processor,
-            device=device
-        )
-        
+        classifier = pipeline("image-classification", model=model, image_processor=image_processor, device=device)
         return classifier
-    except TypeError as te:
-        st.error(f"Error al cargar el modelo con transformers: {te}")
-        return None
     except Exception as e:
         st.error(f"Error al cargar el modelo con transformers: {e}")
         return None
