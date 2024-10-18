@@ -1,6 +1,6 @@
 import streamlit as st
 from src.ui.visualizacion import mostrar_visualizacion
-from src.ui.convertir_png import mostrar_convertir_png  # Importar la nueva función
+from src.ui.convertir_png import mostrar_convertir_png  # Importar la nueva funciónn
 from src.ui.clasificacion_deep_learning import (
     cargar_modelo,
     procesar_archivo,
@@ -63,11 +63,8 @@ def descargar_modelo(model_dir, model_folder, file_id):
 def main():
     # Cargar el archivo CSS externo
     def cargar_css():
-        try:
-            with open('styles/style.css') as f:
-                st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-        except FileNotFoundError:
-            st.error("No se encontró el archivo 'styles/style.css'.")
+        with open('styles/style.css') as f:
+            st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
     cargar_css()
 
