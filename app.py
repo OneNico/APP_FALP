@@ -1,21 +1,64 @@
-# app.pyy
-
 import streamlit as st
 from src.ui.visualizacion import mostrar_visualizacion
 from src.ui.convertir_png import mostrar_convertir_png  # Importar la nueva función
 from src.ui.clasificacion_deep_learning import (
+    cargar_modelo,
     procesar_archivo,
     clasificar_imagen,
     mostrar_resultados
 )
-from src.utilidades.importar_modelo import descargar_modelo, cargar_modelo
 from PIL import Image
 import os
+import torch
+import gdown
+import zipfile
 import logging
+import time
+import random
 
 # Configuración del logger
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
+
+@st.cache_resource
+def descargar_modelo(model_dir, model_folder, file_id):
+    """
+    Descarga y extrae el modelo desde Google Drive si no existe localmente.
+    """
+    model_path = os.path.join(model_dir, model_folder)
+    os.makedirs(model_dir, exist_ok=True)
+    
+    if os.path.exists(model_path):
+        st.info("El modelo ya está presente localmente.")
+        return model_path
+
+    st.info("Descargando el modelo desde Google Drive. Esto puede tardar unos minutos...")
+
+    # Crear una barra de progreso
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+
+    try:
+        url = f"https://drive.google.com/uc?id={file_id}&export=download"
+        zip_path = os.path.join(model_dir, f"{model_folder}.zip")
+
+        for percent_complete in range(1, 101):
+            progress_bar.progress(percent_complete)
+            status_text.text(f"Descargando... {percent_complete}%")
+            time.sleep(random.uniform(0.005, 0.02))
+
+        gdown.download(url, zip_path, quiet=True)
+
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(model_dir)
+        
+        os.remove(zip_path)
+        st.success("Modelo descargado y extraído correctamente.")
+        return model_path
+    except Exception as e:
+        logger.error(f"Error al descargar o extraer el modelo: {e}")
+        st.error(f"Error al descargar o extraer el modelo: {e}")
+        return None
 
 def main():
     # Cargar el archivo CSS externo
@@ -109,29 +152,23 @@ def main():
                 st.image(image, caption='Imagen procesada (224x224)', use_column_width=True)
 
                 with st.spinner("Cargando el modelo (solo lo realizará la primera vez)..."):
-                    # Inicializar el pipeline de clasificación de imágenes
                     model_dir = os.path.join('src', 'data', 'modelos')
                     model_folder = 'VT_V8'
+                    model_path = os.path.join(model_dir, model_folder)
                     file_id_zip = "1S4oBDDV0KGdJQVllj6kmz4pekubVVg-J"
 
-                    # Descargar el modelo si no existe
                     model_path = descargar_modelo(model_dir, model_folder, file_id_zip)
 
                     if model_path:
-                        # Cargar el modelo desde el nuevo módulo
                         classifier = cargar_modelo(model_path)
 
                         if classifier:
-                            # Definir mapeo de etiquetas
                             prediction_mapping = {
                                 'LABEL_0': 'benigna',
                                 'LABEL_1': 'maligna'
                             }
 
-                            # Realizar la inferencia
                             mapped_result = clasificar_imagen(image, classifier, prediction_mapping)
-
-                            # Mostrar los resultados
                             mostrar_resultados(mapped_result)
         else:
             st.info("Por favor, carga una imagen DICOM, PNG o JPG para realizar la clasificación.")
