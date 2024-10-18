@@ -77,7 +77,7 @@ def cargar_modelo(model_path):
         return None
 
     try:
-        # Cargar configuración y procesador de imágenes
+        # Cargar procesador de imágenes
         image_processor = AutoImageProcessor.from_pretrained(model_path)
         
         # Cargar modelo utilizando safetensors
