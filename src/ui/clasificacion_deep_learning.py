@@ -1,4 +1,4 @@
-# src/ui/clasificacion_deep_learning.py
+# src/ui/clasificacion_deep_learning.pyy
 
 import streamlit as st
 from PIL import Image
