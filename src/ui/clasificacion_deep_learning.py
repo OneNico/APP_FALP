@@ -1,4 +1,4 @@
-# src/ui/clasificacion_deep_learning.pyy
+# src/ui/clasificacion_deep_learning.py
 
 import streamlit as st
 from PIL import Image
@@ -6,49 +6,13 @@ import pydicom
 from pydicom.pixel_data_handlers.util import apply_voi_lut
 import numpy as np
 import os
-from transformers import pipeline, AutoImageProcessor, AutoConfig, AutoModelForImageClassification
-import torch
-from safetensors.torch import load_file  # Asegúrate de tener safetensors instalado
+from src.utilidades.importar_modelo import cargar_modelo
 import logging
+import io
 
 # Configuración del logger
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
-
-def cargar_modelo(model_path):
-    """
-    Carga el modelo de clasificación de imágenes desde la ruta especificada.
-    Utiliza GPU si está disponible, de lo contrario, usa CPU.
-
-    :param model_path: Ruta al directorio del modelo.
-    :return: Pipeline de clasificación de imágenes o None si falla la carga.
-    """
-    if not os.path.exists(model_path):
-        st.error(f"La ruta del modelo especificada no existe: {model_path}")
-        return None
-
-    try:
-        # Cargar configuración y procesador de imágenes
-        config = AutoConfig.from_pretrained(model_path)
-        image_processor = AutoImageProcessor.from_pretrained(model_path)
-        
-        # Cargar modelo
-        model = AutoModelForImageClassification.from_pretrained(model_path, trust_remote_code=True)
-        
-        # Determinar dispositivo
-        if torch.cuda.is_available():
-            device = 0  # GPU CUDA
-        elif torch.backends.mps.is_available():
-            device = "mps"  # GPU Apple MPS
-        else:
-            device = -1  # CPU
-
-        # Crear pipeline
-        classifier = pipeline("image-classification", model=model, image_processor=image_processor, device=device)
-        return classifier
-    except Exception as e:
-        st.error(f"Error al cargar el modelo con transformers: {e}")
-        return None
 
 def procesar_archivo(uploaded_file):
     """
