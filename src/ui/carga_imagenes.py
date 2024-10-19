@@ -21,8 +21,7 @@ def cargar_imagenes(opciones, max_imagenes=100):
         else:
             st.info("Por favor, carga uno o más archivos DICOM.")
     elif tipo_carga == "Clasificación mediante Deep Learning":
-        # Actualmente, no se realiza ninguna carga aquí.
-        # Puedes implementar futuras funcionalidades para la clasificación.
+
         st.info("Funcionalidad de Clasificación mediante Deep Learning en desarrollo.")
     else:
         st.info("Selecciona un método de carga de imágenes.")
