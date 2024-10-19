@@ -11,7 +11,7 @@ def main():
     # Configurar el sistema de logging
     setup_logging()
 
-    # Configurar la página de Streamlit
+   
     st.set_page_config(
         page_title="Módulo de Procesamiento de Imágenes",
         layout="wide"
