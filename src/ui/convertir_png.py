@@ -19,7 +19,7 @@ def mostrar_convertir_png(opciones):
     raw_data_dir = os.path.join(os.getcwd(), 'data', 'raw')
     processed_data_dir = os.path.join(os.getcwd(), 'data', 'processed')
 
-    # Verificar si las carpetas existen
+  
     if not os.path.exists(raw_data_dir):
         st.error(f"La carpeta de datos crudos no existe: {raw_data_dir}")
         return
