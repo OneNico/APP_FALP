@@ -80,5 +80,5 @@ def mostrar_visualizacion(opciones):
                         # Actualizar barra de progreso
                         progress_bar.progress((idx + 1) / total)
     elif tipo_carga == "Clasificación mediante Deep Learning":
-        # Actualmente, no se muestra nada aquí.
+        
         st.info("Funcionalidad de Clasificación mediante Deep Learning en desarrollo.")
