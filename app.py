@@ -50,14 +50,23 @@ def descargar_modelo(model_dir, model_folder, file_url):
                 return None
 
             zip_path = os.path.join(model_dir, f"{model_folder}.zip")
+            total_size_in_bytes = int(response.headers.get('content-length', 0))
+            block_size = 1024  # 1 Kibibyte
+            progress_bar = st.progress(0)
+            downloaded_size = 0
+
             with open(zip_path, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    if chunk:
-                        f.write(chunk)
+                for data in response.iter_content(block_size):
+                    downloaded_size += len(data)
+                    f.write(data)
+                    if total_size_in_bytes > 0:
+                        progress = downloaded_size / total_size_in_bytes
+                        progress_bar.progress(min(progress, 1.0))
 
         # Extraer el archivo ZIP
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(model_dir)
+        with st.spinner(f"Extrayendo {model_folder}..."):
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(model_dir)
 
         # Eliminar el archivo ZIP descargado
         os.remove(zip_path)
@@ -147,7 +156,10 @@ def main():
                                                                                           key=key)
 
         elif subseccion == "Convertir a PNG":
-            mostrar_convertir_png(opciones)
+            try:
+                mostrar_convertir_png(opciones)
+            except Exception as e:
+                st.error(f"Error al convertir a PNG: {e}")
 
     elif tipo_carga == "Clasificación mediante Deep Learning":
         st.sidebar.write("### Opciones para Clasificación mediante Deep Learning")
@@ -171,17 +183,17 @@ def main():
                     'primario': {
                         'model_folder': 'ViT-large-patch16-224_B',
                         'file_url': 'https://usmcl-my.sharepoint.com/:u:/g/personal/julio_maturana_usm_cl/EVMIWphh_1ZIrDG6VeKXZX0BIT3vlDBoensMcRx-YTve3w?e=WTaQdV'
-                        # Reemplaza con el URL de descarga directo de tu modelo primario
+                        # Enlace de descarga directo del modelo primario
                     },
                     'secondary_masas': {
                         'model_folder': 'VT_V8',
                         'file_url': 'https://usmcl-my.sharepoint.com/:u:/g/personal/julio_maturana_usm_cl/INSERT_SECONDARY_MASAS_URL_HERE?e=XXXXXX'
-                        # Reemplaza con el URL de descarga directo de tu modelo secundario para masas
+                        # Reemplaza con el URL de descarga directo del modelo secundario para masas
                     },
                     'secondary_calcifi': {
-                        'model_folder': 'Cal_ViT-large-patch16-224_A.ipynb',
+                        'model_folder': 'CALCI',
                         'file_url': 'https://usmcl-my.sharepoint.com/:u:/g/personal/julio_maturana_usm_cl/EbGZhS3H-XFHvOFJKsTmz4sBX2g7OqtrtnaSzlap3b0h5Q?e=iuNG1y'
-                        # Reemplaza con el URL de descarga directo de tu modelo CALCI
+                        # Enlace de descarga directo del modelo CALCI
                     }
                 }
 
@@ -190,11 +202,13 @@ def main():
                 prediction_mappings = {}
 
                 for key, info in modelos_info.items():
-                    model_path = descargar_modelo(
-                        model_dir=os.path.join('src', 'data', 'modelos'),
-                        model_folder=info['model_folder'],
-                        file_url=info['file_url']
-                    )
+                    with st.spinner(f"Preparando el modelo '{info['model_folder']}'..."):
+                        model_path = descargar_modelo(
+                            model_dir=os.path.join('src', 'data', 'modelos'),
+                            model_folder=info['model_folder'],
+                            file_url=info['file_url']
+                        )
+
                     if model_path:
                         if key == 'primario':
                             classifiers['primario'] = cargar_modelo_primary(model_path)
@@ -213,8 +227,8 @@ def main():
                             classifiers['secondary_calcifi'] = cargar_modelo_secondary_calcifi(model_path)
                             prediction_mappings['secondary_calcifi'] = {
                                 'LABEL_0': 'benigna',
-                                'LABEL_1': 'maligna',
-                                'LABEL_2': 'sospechosa'
+                                'LABEL_1': 'sospechosa',
+                                'LABEL_2': 'maligna'
                             }
 
                 # Verificar que el modelo primario se ha cargado correctamente
@@ -258,7 +272,8 @@ def main():
                 else:
                     st.error("No se pudo cargar el modelo primario para la clasificación.")
         else:
-            st.info("Por favor, carga una imagen DICOM, PNG o JPG para realizar la clasificación.")
+            pass
 
-    if __name__ == "__main__":
-        main()
+
+if __name__ == "__main__":
+    main()
