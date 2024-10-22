@@ -1,4 +1,5 @@
 # src/ui/carga_imagenes.py
+#Función para cargar imágenes
 
 import streamlit as st
 import io
